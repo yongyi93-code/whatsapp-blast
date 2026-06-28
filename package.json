@@ -8,6 +8,7 @@
     "start": "node src/server.js",
     "start:electron": "electron .",
     "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
     "test": "node --test"
   },
   "license": "MIT",
@@ -35,6 +36,14 @@
     "mac": {
       "category": "public.app-category.business",
       "target": "dmg"
-    }
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "publish": null
   }
 }
