@@ -26,14 +26,28 @@ function createWindow(port) {
 }
 
 function findChromePath() {
-  // 打包后 node_modules 被解压到 app.asar.unpacked 里
+  const fs = require('fs');
+
+  // 优先使用系统已安装的 Google Chrome
+  if (process.platform === 'win32') {
+    const winPaths = [
+      path.join('C:\\', 'Program Files', 'Google', 'Chrome', 'Application', 'chrome.exe'),
+      path.join('C:\\', 'Program Files (x86)', 'Google', 'Chrome', 'Application', 'chrome.exe'),
+      path.join(process.env.LOCALAPPDATA || '', 'Google', 'Chrome', 'Application', 'chrome.exe'),
+    ];
+    for (const p of winPaths) {
+      if (fs.existsSync(p)) return p;
+    }
+  } else if (process.platform === 'darwin') {
+    const macPath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+    if (fs.existsSync(macPath)) return macPath;
+  }
+
+  // 备用：puppeteer 自带的 Chromium（打包后在 asar.unpacked 里）
   const unpackedModules = app.isPackaged
     ? path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules')
     : path.join(__dirname, '..', 'node_modules');
 
-  const fs = require('fs');
-
-  // puppeteer 新版 (.cache) 和旧版 (.local-chromium) 的路径都试一下
   const cacheDirs = [
     path.join(unpackedModules, 'puppeteer', '.local-chromium'),
     path.join(unpackedModules, 'puppeteer', '.cache', 'chrome'),
@@ -42,7 +56,6 @@ function findChromePath() {
 
   for (const cacheDir of cacheDirs) {
     if (!fs.existsSync(cacheDir)) continue;
-    // 找里面的 chrome.exe (Windows) 或 chrome (Mac/Linux)
     const exeName = process.platform === 'win32' ? 'chrome.exe' : 'chrome';
     const found = walkFind(cacheDir, exeName, fs);
     if (found) return found;
