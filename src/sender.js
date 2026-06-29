@@ -38,6 +38,7 @@ async function runBlast(service, recipients, template, attachments, options = {}
   const delayMin = options.delayMinMs ?? config.delay.minMs;
   const delayMax = options.delayMaxMs ?? config.delay.maxMs;
   const maxPerRun = options.maxPerRun ?? config.maxPerRun;
+  const hdPhoto = options.hdPhoto ?? false;
   const onProgress = options.onProgress || (() => {});
   const shouldStop = options.shouldStop || (() => false);
 
@@ -65,7 +66,7 @@ async function runBlast(service, recipients, template, attachments, options = {}
     };
 
     try {
-      await service.sendMessage(r.chatId, text, attachments);
+      await service.sendMessage(r.chatId, text, attachments, hdPhoto);
       sent++;
       const entry = { ...base, status: 'sent', missing };
       results.push(entry);

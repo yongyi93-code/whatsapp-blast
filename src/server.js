@@ -88,6 +88,7 @@ app.post('/api/send', async (req, res) => {
   const template = String(req.body.template || '');
   const delayMinMs = Number(req.body.delayMinMs) || config.delay.minMs;
   const delayMaxMs = Number(req.body.delayMaxMs) || config.delay.maxMs;
+  const hdPhoto = Boolean(req.body.hdPhoto);
 
   runState.running = true;
   runState.stopRequested = false;
@@ -103,6 +104,7 @@ app.post('/api/send', async (req, res) => {
     const summary = await sender.runBlast(whatsapp, runState.recipients, template, attachmentPaths, {
       delayMinMs,
       delayMaxMs,
+      hdPhoto,
       maxPerRun: config.maxPerRun,
       onProgress: (entry) => io.emit('send:progress', entry),
       shouldStop: () => runState.stopRequested,

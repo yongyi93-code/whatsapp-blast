@@ -121,7 +121,7 @@ class WhatsAppService {
 
   // 发送一条消息：文字 + 可选附件列表（文件绝对路径）。
   // 有附件时，文字作为第一个附件的 caption；其余附件单独发。
-  async sendMessage(chatId, text, attachmentPaths = []) {
+  async sendMessage(chatId, text, attachmentPaths = [], hdPhoto = false) {
     if (!this.client) throw new Error('WhatsApp 未初始化');
 
     if (!attachmentPaths || attachmentPaths.length === 0) {
@@ -131,7 +131,11 @@ class WhatsAppService {
 
     for (let i = 0; i < attachmentPaths.length; i++) {
       const media = MessageMedia.fromFilePath(attachmentPaths[i]);
-      const options = i === 0 && text ? { caption: text } : {};
+      const isImage = media.mimetype && media.mimetype.startsWith('image/');
+      const options = {
+        ...(i === 0 && text ? { caption: text } : {}),
+        ...(hdPhoto && isImage ? { sendMediaAsDocument: true } : {}),
+      };
       await this.client.sendMessage(chatId, media, options);
     }
   }
