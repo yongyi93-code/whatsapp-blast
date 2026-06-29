@@ -29,24 +29,30 @@ jobs:
           name: windows-installer
           path: dist/*.exe
 
-  build-mac:
+  build-mac-arm64:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build Mac DMG
-        run: npm run dist:mac
-
-      - name: Upload Mac DMG
-        uses: actions/upload-artifact@v4
+      - run: npm install
+      - run: npm run dist:mac -- --arm64
+      - uses: actions/upload-artifact@v4
         with:
-          name: mac-dmg
+          name: mac-dmg-arm64-M1-M2-M3
+          path: dist/*.dmg
+
+  build-mac-x64:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install
+      - run: npm run dist:mac -- --x64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-dmg-x64-Intel
           path: dist/*.dmg
