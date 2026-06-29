@@ -44,11 +44,21 @@ class WhatsAppService {
 
     const puppeteerOpts = {
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
     };
-    // 指定系统浏览器（当自带 Chromium 不可用时）
+
+    // 打包后 Electron 环境里，puppeteer 自带的 Chromium 路径会变，需要手动指定。
     if (config.chromePath) {
       puppeteerOpts.executablePath = config.chromePath;
+    } else if (process.versions.electron) {
+      // 从 node_modules 里找 puppeteer 自带的 chrome 路径
+      try {
+        const puppeteer = require('puppeteer');
+        const execPath = puppeteer.executablePath();
+        if (execPath) puppeteerOpts.executablePath = execPath;
+      } catch (_) {
+        // 找不到就让 whatsapp-web.js 自己处理
+      }
     }
 
     this.client = new Client({
